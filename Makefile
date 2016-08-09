@@ -160,7 +160,7 @@ release:
 	@rm -fr $(BUILD) $(OUTPUT_D) $(RELEASE)
 	@-make --no-print-directory gateway
 	@-make --no-print-directory cakerop
-	@rm -fr $(BUILD) $(OUTPUT).bin $(OUTPUT).elf $(CURDIR)/$(LOADER)/data
+	@rm -fr $(BUILD) $(OUTPUT).bin $(OUTPUT).elf
 	@make --no-print-directory brahma
 	@[ -d $(RELEASE) ] || mkdir -p $(RELEASE)
 	@[ -d $(RELEASE)/$(TARGET) ] || mkdir -p $(RELEASE)/$(TARGET)
@@ -203,6 +203,13 @@ $(OUTPUT).elf	:	$(OFILES)
 	@$(OBJCOPY) --set-section-flags .bss=alloc,load,contents -O binary $< $@
 	@echo built ... $(notdir $@)
 
+#---------------------------------------------------------------------------------
+# you need a rule like this for each extension you use as binary data
+#---------------------------------------------------------------------------------
+%.hdr.o: %.hdr
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	@$(bin2o)
 
 -include $(DEPENDS)
 
