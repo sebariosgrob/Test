@@ -430,7 +430,7 @@ u32 GetSystemId0(u8* id0)
     return 0;
 }
 
-u32 DumpFile(u32 param)
+u32 DumpNandFile(u32 param)
 {
     NandFileInfo* f_info = GetNandFileInfo(param);
     PartitionInfo* p_info = GetPartitionInfo(f_info->partition_id);
@@ -454,7 +454,7 @@ u32 DumpFile(u32 param)
     return 0;
 }
 
-u32 InjectFile(u32 param)
+u32 InjectNandFile(u32 param)
 {
     NandFileInfo* f_info = GetNandFileInfo(param);
     PartitionInfo* p_info = GetPartitionInfo(f_info->partition_id);
