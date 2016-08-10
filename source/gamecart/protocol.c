@@ -93,10 +93,10 @@ void Cart_Init(void)
     ResetCartSlot(); //Seems to reset the cart slot?
 
     REG_CTRCARDSECCNT &= 0xFFFFFFFB;
-    ioDelay(0x30000);
+    ioDelay(0x40000);
 
     SwitchToNTRCARD();
-    ioDelay(0x30000);
+    ioDelay(0x40000);
 
     REG_NTRCARDROMCNT = 0;
     REG_NTRCARDMCNT &= 0xFF;
@@ -108,6 +108,7 @@ void Cart_Init(void)
 
     // Reset
     NTR_CmdReset();
+    ioDelay(0x40000);
     CartID = NTR_CmdGetCartId();
 
     // 3ds
