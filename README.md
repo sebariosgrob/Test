@@ -106,13 +106,17 @@ This category includes all titlekey related features. Decrypted titlekeys (`decT
 
 ### SysNAND / EmuNAND Options
 This is actually two categories in the main menu, but the functionality provided the same (for SysNAND / EmuNAND respectively). These categories include all features that dump, inject, modify or extract information from/to the SysNAND/EmuNAND. For functions that output files to the SD card, the user can choose a filename from a predefined list. For functions that use files from the SD card for input, the user can choose among all candidates existing on the SD card. For an extra layer of safety, critical(!) features - meaning all features that actually introduce change to the NAND - are protected by a warning message and an unlock sequence that the user has to enter. Caution is adviced with these protected features. They should only be used by the informed user.
-* __(Sys/Emu)NAND Backup & Restore__: This contains multiple options to backup or restore your SysNAND or EmuNAND. The submenu contains the following entries:
+* __(Sys/Emu)NAND Backup & Restore...__: This contains multiple options to backup or restore your SysNAND or EmuNAND. The submenu contains the following entries:
   * __NAND Backup__: Dumps the `NAND.bin` file from your SysNAND or the `ÈmuNAND.bin` file from your EmuNAND. This is a full backup of your 3DS System NAND and can be used to restore your 3DS SysNAND / EmuNAND to a previous state or for modifications. 
   * __NAND Backup (minsize)__: Same as the above option, but only dumps the actually used size of the NAND (the remainder is only unused data). Use this instead of the above to save some space on your SD card.
   * __NAND Restore(!)__: This fully restores your SysNAND or EmuNAND from the provided `NAND.bin` file (needs to be in the `/files9/` work folder or in the SD card root). Although backups will be checked before restoring, be careful not to restore a corrupted NAND.bin file. Also note that you won't have access to this feature if your SysNAND is too messed up or on a too high FW version to even start Decrypt9 (should be self explanatory).
   * __NAND Restore (forced)(!)__: Same as the above option, but skips most safety checks. This is not recommended to be used without being properly informed. Keep in mind that, if the above option stops you from restoring a NAND backup, it is normally with good reason and means a prevented brick.
   * __NAND Restore (keep a9lh)(!)__: Only available on SysNAND, this is the same as the standard (unforced) restore option, but keeps all your arm9loaderhax files intact. Only use if you actually have arm9loaderhax installed.
   * __Validate NAND Dump__: Use this to check and verify NAND dumps on your SD card. If this check passes on a NAND dump, you will also be able to restore it via the standard restore option.
+* __CTRNAND Transfer...__: This menu contains various options to enable transfer of CTRNAND partitions between consoles.
+  * __Auto CTRNAND Transfer__: Automatically transfer a transferable CTRNAND image to this consoles NAND. Without A9LH installed, this will overwrite the FIRM0, FIRM1, CTRNAND. With A9LH installed, this will only overwrite CTRNAND. O3DS images can be transferred into N3DS consoles, but the NCSD header of the NAND may be overwritten.
+  * __Dump transferable CTRNAND__: Dump a CTRNAND image for later use in the feature above. Transferables images can be shared between consoles.
+  * __Autofix CTRNAND__: Use this to automatically fixes the CMACs for `movable.sed`, `*.db` and system saves inside the CTRNAND. It will also fix the <id0> inside the data folder. This is useful f.e. when a CTRNAND from another console was previously injected the regular way.
 * __Partition Dump...__: This allows you to dump & decrypt any of the partitions inside your NANDs (TWLN / TWLP / AGBSAVE / FIRM0 / FIRM1 / CTRNAND / Sector0x96). Partitions with a file system (TWLN / TWLP / CTRNAND) can easily be mounted, viewed and edited on Windows via [OSFMount](http://www.osforensics.com/tools/mount-disk-images.html). These partitions are included in your NAND and can be dumped by this feature:
   * __TWLN__: _TWL-NAND FAT16 File System_ - this is the same as on a Nintendo DSi console. Installed DSiWare titles reside in this partition. This partition can be used, f.e. to set up [SudokuHax](https://gbatemp.net/threads/tutorial-new-installing-sudokuhax-on-3ds-4-x-9-2.388621/).
   * __TWLP__: _TWL-NAND PHOTO FAT12 File System_ - this is a Nintendo DSi specific partition for storing photos.
@@ -123,26 +127,28 @@ This is actually two categories in the main menu, but the functionality provided
   * __Sector0x96__: _Console-unique encrypted New3DS key-storage_ - this contains N3DS keys, access to it is required for A9LH installation.
   * __NAND header__: _NCSD header_ - the header of your NAND, this is is console-unique and contains the offsets/sizes of all partitions. It also contains the encrypted TWL MBR partition table.
 * __Partition Inject...(!)__: This allows you to reencrypt & inject any of the partitions on your NAND from the respective files (`TWLN.bin` / `TWLP.bin` / `AGBSAVE.bin` / `FIRM0.bin` / `FIRM1.bin` / `CTRNAND.bin` / `Sector0x96.bin`) (see above). Only use this if you know exactly what you're doing and be careful. While there are some safety clamps in place, they won't protect you from a major messup caused by yourself.
-* __File Dump...__: This allows you to directly dump & decrypt various files of interest from your SysNAND and EmuNAND. These files are included in this feature:
+* __System File Dump...__: This allows you to directly dump & decrypt various files of interest from your SysNAND and EmuNAND. These files are included in this feature:
   * __ticket.db__: _Contains titlekeys for installed titles_ - use this with [Cearps FunkyCIA](https://gbatemp.net/threads/release-funkycia2-build-cias-from-your-eshop-content-super-easy-and-fast-2-1-fix.376941/) to download installed (legit, purchased) titles directly to your PCs ard drive.
   * __title.db__: _A database of installed titles_ - apart from informative purposes this doesn't serve a direct purpose for most users at the moment.
   * __import.db__: _A database of titles to be installed_ - this can be used to get rid of the FW update nag at a later time. Read more on it in this [GBAtemp thread](https://gbatemp.net/threads/poc-removing-update-nag-on-emunand.399460/).
   * __certs.db__: _A database of certificates_ - any practical use for this is unknown at the moment.
   * __SecureInfo_A__: _This contains your region and an ASCII serial number_ - this can be used to temporarily change your 3DS region. The dump / inject options in Decrypt9 simplify [the tutorial found here](https://gbatemp.net/threads/release-3ds-nand-secureinfo-tool-for-region-change.383792/).
   * __LocalFriendCodeSeed_B__: _This contains your FriendCodeSeed_ - in theory this can be used to import your friend list to another 3DS.
-  * __movable.sed__: _This contains the keyY for decryption of data on the SD card_ - Decrypt9 itself uses this in the SD Decryptor / Encryptor and in SD padgen. 
+  * __movable.sed__: _This contains the keyY for decryption of data on the SD card_ - Decrypt9 itself uses this in the SD Decryptor / Encryptor and in SD padgen.
+* __System File Inject...(!)__: This allows you to directly encrypt & inject various files of interest into the SysNAND and EmuNAND. For more information check out the list above.
+* __System Save Dump...__: This allows you to directly dump & decrypt various system saves of interest from your SysNAND and EmuNAND. These files are included in this feature: 
   * __seedsave.bin__: _Contains the seeds for decryption of 9.6x seed encrypted titles_ - only the seeds for installed (legit, purchased) titles are included in this. Use [SEEDconv](https://gbatemp.net/threads/download-seedconv-seeddb-bin-generator-for-use-with-decrypt9.392856/) (recommended) or the included Python script `seeddb_gen.py` to extract the seeds from this into the Decrypt9 readable `seeddb.bin`.
   * __nagsave.bin__: _Contains some data relating to system updates_ - it is possible to block automatic system updates (ie. the 'update nag') with this file. Research is still in progress. [Read this](https://gbatemp.net/threads/poc-removing-update-nag-on-emunand.399460/page-5#post-5863332) and the posts after it for more information.
   * __nnidsave.bin__: _Contains your NNID data_ - this can be used to reset / remove the NNID from your system, without removing any other data. See [here](https://gbatemp.net/threads/download-decrypt9-open-source-decryption-tools-wip.388831/page-89#post-6000951) for instructions.
   * __friendsave.bin__: _Contains your actual friendlist_ - this can be used to backup and restore your friendlist in conjunction with `LocalFriendCodeSeed_B`. Also see [here](http://gbatemp.net/threads/download-decrypt9-open-source-decryption-tools-wip.388831/page-167#post-6294331).
-* __File Inject...(!)__: This allows you to directly encrypt & inject various files of interest into the SysNAND and EmuNAND. For more information check out the list above.
+  * __configsave.bin__: _The config savegame_ - this contains various things that are set via the config menu. It also contains a flag telling the system that initial setup was already executed.
+* __System File Inject...(!)__: This allows you to directly encrypt & inject various system saves into the SysNAND and EmuNAND. For more information check out the list above.
 * __Miscellaneous..__: This section contains various features that don't fit into any of the other categories.
   * __Health&Safety Dump__: This allows you to to dump the decrypted Health and Safety system app to your SD card. The dumped H&S app can be used to [create injectable files for any homebrew software](https://gbatemp.net/threads/release-inject-any-app-into-health-safety-o3ds-n3ds-cfw-only.402236/).
   * __Health&Safety Inject(!)__: This is used to inject any app into your Health & Safety system app (as long as it is smaller than the original H&S app). Multiple safety clamps are in place, and this is a pretty safe feature. Users are still adviced to be cautious using this and only use eiter the original hs.app or inject apps created with the [Universal Inject Generator](https://gbatemp.net/threads/release-inject-any-app-into-health-safety-o3ds-n3ds-cfw-only.402236/). This feature will detect all injectable apps on the SD card and let the user choose which one to inject.
   * __GBA VC Save Dump__: Only available on SysNAND, use this to dump the GBA VC Savegame from your NAND. Other than the headered `AGBSAVE.bin` format, this allows usage in emulators. `slot0x24keyY.bin` is required for this to work.
   * __GBA VC Save Inject__: Only available on SysNAND, use this to inject back a GBA VC Savegame (f.e. after manual editing) to your NAND. Same as above, `slot0x24keyY.bin` is required for this to work.
   * __Update SeedDB__: Use this to create or update the ´seeddb.bin´ file on your SD card with the seeds currently installed in your Sys/EmuNAND. Only new seeds will get added to `seeddb.bin`, seeds already in the database stay untouched.
-  * __Autofix CMACs__: Use this to automatically fix the CMACs for `movable.sed` and `*.db` inside the CTRNAND. This is useful for fixing corrupted files and/or transferring CTRNAND partitions between consoles. 
   * __NCCH FIRMs Dump__: Use this to dump NATIVE_FIRM, SAFE_MODE_FIRM, TWL_FIRM and AGB_FIRM from your NAND. For N3DS FIRMs, the ARM9 section will be decrypted as well. This feature is at the moment only useful for research.
   * __FIRM ARM9 Decryptor__: Use this to decrypt the ARM9 section of N3DS FIRMs. This feature is at the moment only useful for research.
 
@@ -172,6 +178,8 @@ This category includes all features handling dumping of content from external ca
 * __Dump & Decrypt Cart (full)__: Same as 'Dump Cart (full)', but also decrypts the cartridge data on-the-fly. Decrypted cartridge data is required for emulators and recommended for CIA conversion. The recommended CIA conversion tool is [3dsconv](https://github.com/ihaveamac/3dsconv).
 * __Dump & Decrypt Cart (trim)__: Same as above, but discards the unused padding for smaller output and faster processing. This is recommended over the above feature.
 * __Dump Cart to CIA__: Use this to directly dump an inserted cartridge to a fully decrypted CIA file, which can be installed to a patched system using CIA installer software like [FBI](https://github.com/Steveice10/FBI/releases). For most users, this type of dump will be the most convenient.
+* __Dump NTR Cart (full)__: This feature dumps the full data from an inserted Nintendo DS cartridge.
+* __Dump NTR Cart (trim)__: Same as the above, but discards the unused padding for smaller output and faster processing.
 * __Dump Private Header__: Dumps the cartridge unique private header from the inserted cartridge.
 
 ### Maintenance Options
@@ -199,7 +207,10 @@ You may use this under the terms of the GNU General Public License GPL v2 or und
 * ihaveamac for first developing the simple CIA generation method and for being an immensive help in porting it
 * patois, delebile, SteveIce10 for Brahma and it's updates
 * mid-kid for CakeHax and for hosting freenode #Cakey
-* Shadowtrance, dark_samus3, Syphurith, AuroraWright for being of great help developing this
+* Shadowtrance, Syphurith, AuroraWright for being of great help developing various features
+* dark_samus3 and Plailect for making CTRNAND transfers a possibility
+* osilloscorpion and idgrepthat for enabling NTR cart dumps
 * profi200 for helpful hints that first made developing some features possible
-* Datalogger, zoogie, atkfromabove, mixups, key1340, k8099, Al3x_10m, Supster131, stbinan, Wolfvak, imanoob, Stary2001 and countless others from freenode #Cakey and the GBAtemp forums for testing, feedback and helpful hints
+* Al3x_10m for helping me with countless hours of testing and useful advice
+* Datalogger, zoogie, atkfromabove, mixups, key1340, k8099, Supster131, stbinan, Wolfvak, imanoob, Stary2001 and countless others from freenode #Cakey and the GBAtemp forums for testing, feedback and helpful hints
 * Everyone I forgot about - if you think you deserve to be mentioned, just contact me
