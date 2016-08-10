@@ -44,34 +44,40 @@ MenuInfo menu[] =
         }
     },
     {
-        "SysNAND Options", 6,
+        "SysNAND Options", 9,
         {
             { "SysNAND Backup/Restore...",    NULL,                   SUBMENU_START +  0 },
-            { "Partition Dump...",            NULL,                   SUBMENU_START +  2 },
-            { "Partition Inject...",          NULL,                   SUBMENU_START +  4 },
-            { "File Dump...",                 NULL,                   SUBMENU_START +  6 },
-            { "File Inject...",               NULL,                   SUBMENU_START +  8 },
-            { "Miscellaneous...",             NULL,                   SUBMENU_START + 10 }
+            { "CTRNAND transfer...",          NULL,                   SUBMENU_START +  2 },
+            { "Partition Dump...",            NULL,                   SUBMENU_START +  4 },
+            { "Partition Inject...",          NULL,                   SUBMENU_START +  6 },
+            { "System File Dump...",          NULL,                   SUBMENU_START +  8 },
+            { "System File Inject...",        NULL,                   SUBMENU_START + 10 },
+            { "System Save Dump...",          NULL,                   SUBMENU_START + 12 },
+            { "System Save Inject...",        NULL,                   SUBMENU_START + 14 },
+            { "Miscellaneous...",             NULL,                   SUBMENU_START + 16 }
         }
     },
     {
-        "EmuNAND Options", 6,
+        "EmuNAND Options", 9,
         {
             { "EmuNAND Backup/Restore...",    NULL,                   SUBMENU_START +  1 },
-            { "Partition Dump...",            NULL,                   SUBMENU_START +  3 },
-            { "Partition Inject...",          NULL,                   SUBMENU_START +  5 },
-            { "File Dump...",                 NULL,                   SUBMENU_START +  7 },
-            { "File Inject...",               NULL,                   SUBMENU_START +  9 },
-            { "Miscellaneous...",             NULL,                   SUBMENU_START + 11 }
+            { "CTRNAND transfer...",          NULL,                   SUBMENU_START +  3 },
+            { "Partition Dump...",            NULL,                   SUBMENU_START +  5 },
+            { "Partition Inject...",          NULL,                   SUBMENU_START +  7 },
+            { "System File Dump...",          NULL,                   SUBMENU_START +  9 },
+            { "System File Inject...",        NULL,                   SUBMENU_START + 11 },
+            { "System Save Dump...",          NULL,                   SUBMENU_START + 13 },
+            { "System Save Inject...",        NULL,                   SUBMENU_START + 15 },
+            { "Miscellaneous...",             NULL,                   SUBMENU_START + 17 }
         }
     },
     {
         "Content Decryptor Options", 4,
         {
-            { "NCCH/NCSD File Options...",    NULL,                   SUBMENU_START + 12 },
-            { "CIA File Options...",          NULL,                   SUBMENU_START + 13 },
-            { "BOSS File Options...",         NULL,                   SUBMENU_START + 14 },
-            { "SD File Options...",           NULL,                   SUBMENU_START + 15 }
+            { "NCCH/NCSD File Options...",    NULL,                   SUBMENU_START + 18 },
+            { "CIA File Options...",          NULL,                   SUBMENU_START + 19 },
+            { "BOSS File Options...",         NULL,                   SUBMENU_START + 20 },
+            { "SD File Options...",           NULL,                   SUBMENU_START + 21 }
         }
     },
     {
@@ -82,8 +88,8 @@ MenuInfo menu[] =
             { "Dump & Decrypt Cart (full)",   &DumpGameCart,          CD_DECRYPT },
             { "Dump & Decrypt Cart (trim)",   &DumpGameCart,          CD_DECRYPT | CD_TRIM },
             { "Dump Cart to CIA",             &DumpGameCart,          CD_DECRYPT | CD_MAKECIA },
-            { "Dump NTR CART (full)",         &DumpGameCart,          CD_NTRCART },
-            { "Dump NTR CART (trim)",         &DumpGameCart,          CD_NTRCART | CD_TRIM },
+            { "Dump NTR Cart (full)",         &DumpGameCart,          CD_NTRCART },
+            { "Dump NTR Cart (trim)",         &DumpGameCart,          CD_NTRCART | CD_TRIM },
             { "Dump Private Header",          &DumpPrivateHeader,     0 }
         }
     },
@@ -120,7 +126,23 @@ MenuInfo menu[] =
         }
     },
     {
-        "Partition Dump... (SysNAND)", 8, // ID 2
+        "SysNAND Transfer Options", 3, // ID 2
+        {
+            { "Auto CTRNAND Transfer",        &NandTransfer,          N_NANDWRITE },
+            { "Dump transferable CTRNAND",    &DumpTransferable,      0 },
+            { "Autofix CTRNAND",              &AutoFixCtrnand,        N_NANDWRITE }
+        }
+    },
+    {
+        "EmuNAND Transfer Options", 3, // ID 3
+        {
+            { "Auto CTRNAND Transfer",        &NandTransfer,          N_NANDWRITE | N_EMUNAND },
+            { "Dump transferable CTRNAND",    &DumpTransferable,      N_EMUNAND },
+            { "Autofix CTRNAND",              &AutoFixCtrnand,        N_NANDWRITE | N_EMUNAND }
+        }
+    },
+    {
+        "Partition Dump... (SysNAND)", 8, // ID 4
         {
             { "Dump TWLN Partition",          &DecryptNandPartition,  P_TWLN },
             { "Dump TWLP Partition",          &DecryptNandPartition,  P_TWLP },
@@ -133,7 +155,7 @@ MenuInfo menu[] =
         }
     },
     {
-        "Partition Dump...(EmuNAND)", 8, // ID 3
+        "Partition Dump...(EmuNAND)", 8, // ID 5
         {
             { "Dump TWLN Partition",          &DecryptNandPartition,  N_EMUNAND | P_TWLN },
             { "Dump TWLP Partition",          &DecryptNandPartition,  N_EMUNAND | P_TWLP },
@@ -146,7 +168,7 @@ MenuInfo menu[] =
         }
     },
     {
-        "Partition Inject... (SysNAND)", 8, // ID 4
+        "Partition Inject... (SysNAND)", 8, // ID 6
         {
             { "Inject TWLN Partition",        &InjectNandPartition,   N_NANDWRITE | P_TWLN },
             { "Inject TWLP Partition",        &InjectNandPartition,   N_NANDWRITE | P_TWLP },
@@ -159,7 +181,7 @@ MenuInfo menu[] =
         }
     },
     {
-        "Partition Inject... (EmuNAND)", 8, // ID 5
+        "Partition Inject... (EmuNAND)", 8, // ID 7
         {
             { "Inject TWLN Partition",        &InjectNandPartition,   N_NANDWRITE | N_EMUNAND | P_TWLN },
             { "Inject TWLP Partition",        &InjectNandPartition,   N_NANDWRITE | N_EMUNAND | P_TWLP },
@@ -172,7 +194,7 @@ MenuInfo menu[] =
         }
     },
     {
-        "File Dump... (SysNAND)", 11, // ID 6
+        "System File Dump... (SysNAND)", 7, // ID 8
         {
             { "Dump ticket.db",               &DumpNandFile,          F_TICKET },
             { "Dump title.db",                &DumpNandFile,          F_TITLE },
@@ -180,15 +202,11 @@ MenuInfo menu[] =
             { "Dump certs.db",                &DumpNandFile,          F_CERTS },
             { "Dump SecureInfo_A",            &DumpNandFile,          F_SECUREINFO },
             { "Dump LocalFriendCodeSeed_B",   &DumpNandFile,          F_LOCALFRIEND },
-            { "Dump movable.sed",             &DumpNandFile,          F_MOVABLE },
-            { "Dump seedsave.bin",            &DumpNandFile,          F_SEEDSAVE },
-            { "Dump nagsave.bin",             &DumpNandFile,          F_NAGSAVE },
-            { "Dump nnidsave.bin",            &DumpNandFile,          F_NNIDSAVE },
-            { "Dump friendsave.bin",          &DumpNandFile,          F_FRIENDSAVE }
+            { "Dump movable.sed",             &DumpNandFile,          F_MOVABLE }
         }
     },
     {
-        "File Dump... (EmuNAND)", 11, // ID 7
+        "System File Dump... (EmuNAND)", 7, // ID 9
         {
             { "Dump ticket.db",               &DumpNandFile,          N_EMUNAND | F_TICKET },
             { "Dump title.db",                &DumpNandFile,          N_EMUNAND | F_TITLE },
@@ -196,15 +214,11 @@ MenuInfo menu[] =
             { "Dump certs.db",                &DumpNandFile,          N_EMUNAND | F_CERTS },
             { "Dump SecureInfo_A",            &DumpNandFile,          N_EMUNAND | F_SECUREINFO },
             { "Dump LocalFriendCodeSeed_B",   &DumpNandFile,          N_EMUNAND | F_LOCALFRIEND },
-            { "Dump movable.sed",             &DumpNandFile,          N_EMUNAND | F_MOVABLE },
-            { "Dump seedsave.bin",            &DumpNandFile,          N_EMUNAND | F_SEEDSAVE },
-            { "Dump nagsave.bin",             &DumpNandFile,          N_EMUNAND | F_NAGSAVE },
-            { "Dump nnidsave.bin",            &DumpNandFile,          N_EMUNAND | F_NNIDSAVE },
-            { "Dump friendsave.bin",          &DumpNandFile,          N_EMUNAND | F_FRIENDSAVE }
+            { "Dump movable.sed",             &DumpNandFile,          N_EMUNAND | F_MOVABLE }
         }
     },
     {
-        "File Inject... (SysNAND)", 11, // ID 8
+        "System File Inject... (SysNAND)", 7, // ID 10
         {
             { "Inject ticket.db",             &InjectNandFile,        N_NANDWRITE | F_TICKET },
             { "Inject title.db",              &InjectNandFile,        N_NANDWRITE | F_TITLE },
@@ -212,15 +226,11 @@ MenuInfo menu[] =
             { "Inject certs.db",              &InjectNandFile,        N_NANDWRITE | F_CERTS },
             { "Inject SecureInfo_A",          &InjectNandFile,        N_NANDWRITE | F_SECUREINFO },
             { "Inject LocalFriendCodeSeed_B", &InjectNandFile,        N_NANDWRITE | F_LOCALFRIEND },
-            { "Inject movable.sed",           &InjectNandFile,        N_NANDWRITE | F_MOVABLE },
-            { "Inject seedsave.bin",          &InjectNandFile,        N_NANDWRITE | F_SEEDSAVE },
-            { "Inject nagsave.bin",           &InjectNandFile,        N_NANDWRITE | F_NAGSAVE },
-            { "Inject nnidsave.bin",          &InjectNandFile,        N_NANDWRITE | F_NNIDSAVE },
-            { "Inject friendsave.bin",        &InjectNandFile,        N_NANDWRITE | F_FRIENDSAVE }
+            { "Inject movable.sed",           &InjectNandFile,        N_NANDWRITE | F_MOVABLE }
         }
     },
     {
-        "File Inject... (EmuNAND)", 11, // ID 9
+        "System File Inject... (EmuNAND)", 7, // ID 11
         {
             { "Inject ticket.db",             &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_TICKET },
             { "Inject title.db",              &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_TITLE },
@@ -228,45 +238,73 @@ MenuInfo menu[] =
             { "Inject certs.db",              &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_CERTS },
             { "Inject SecureInfo_A",          &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_SECUREINFO },
             { "Inject LocalFriendCodeSeed_B", &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_LOCALFRIEND },
-            { "Inject movable.sed",           &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_MOVABLE },
-            { "Inject seedsave.bin",          &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_SEEDSAVE },
-            { "Inject nagsave.bin",           &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_NAGSAVE },
-            { "Inject nnidsave.bin",          &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_NNIDSAVE },
-            { "Inject friendsave.bin",        &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_FRIENDSAVE }
+            { "Inject movable.sed",           &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_MOVABLE }
         }
     },
     {
-        "Miscellaneous... (SysNAND)", 10, // ID 10
+        "System Save Dump... (SysNAND)", 5, // ID 12
         {
-            
+            { "Dump seedsave.bin",            &DumpNandFile,          F_SEEDSAVE },
+            { "Dump nagsave.bin",             &DumpNandFile,          F_NAGSAVE },
+            { "Dump nnidsave.bin",            &DumpNandFile,          F_NNIDSAVE },
+            { "Dump friendsave.bin",          &DumpNandFile,          F_FRIENDSAVE },
+            { "Dump configsave.bin",          &DumpNandFile,          F_CONFIGSAVE }
+        }
+    },
+    {
+        "System Save Dump... (EmuNAND)", 5, // ID 13
+        {
+            { "Dump seedsave.bin",            &DumpNandFile,          N_EMUNAND | F_SEEDSAVE },
+            { "Dump nagsave.bin",             &DumpNandFile,          N_EMUNAND | F_NAGSAVE },
+            { "Dump nnidsave.bin",            &DumpNandFile,          N_EMUNAND | F_NNIDSAVE },
+            { "Dump friendsave.bin",          &DumpNandFile,          N_EMUNAND | F_FRIENDSAVE },
+            { "Dump configsave.bin",          &DumpNandFile,          N_EMUNAND | F_CONFIGSAVE }
+        }
+    },
+    {
+        "System Save Inject... (SysNAND)", 5, // ID 14
+        {
+            { "Inject seedsave.bin",          &InjectNandFile,        N_NANDWRITE | F_SEEDSAVE },
+            { "Inject nagsave.bin",           &InjectNandFile,        N_NANDWRITE | F_NAGSAVE },
+            { "Inject nnidsave.bin",          &InjectNandFile,        N_NANDWRITE | F_NNIDSAVE },
+            { "Inject friendsave.bin",        &InjectNandFile,        N_NANDWRITE | F_FRIENDSAVE },
+            { "Inject configsave.bin",        &InjectNandFile,        N_NANDWRITE | F_CONFIGSAVE }
+        }
+    },
+    {
+        "System Save Inject... (EmuNAND)", 5, // ID 15
+        {
+            { "Inject seedsave.bin",          &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_SEEDSAVE },
+            { "Inject nagsave.bin",           &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_NAGSAVE },
+            { "Inject nnidsave.bin",          &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_NNIDSAVE },
+            { "Inject friendsave.bin",        &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_FRIENDSAVE },
+            { "Inject configsave.bin",        &InjectNandFile,        N_NANDWRITE | N_EMUNAND | F_CONFIGSAVE }
+        }
+    },
+    {
+        "Miscellaneous... (SysNAND)", 7, // ID 16
+        {
             { "Health&Safety Dump",           &DumpHealthAndSafety,   0 },
             { "Health&Safety Inject",         &InjectHealthAndSafety, N_NANDWRITE },
             { "GBA VC Save Dump",             &DumpGbaVcSave,         0 },
             { "GBA VC Save Inject",           &InjectGbaVcSave,       N_NANDWRITE },
             { "Update SeedDB",                &UpdateSeedDb,          0 },
-            { "Autofix CTRNAND",              &AutoFixCtrnand,        N_NANDWRITE },
             { "NCCH FIRMs Dump",              &DumpNcchFirms,         0 },
-            { "FIRM ARM9 Decryptor",          &DecryptFirmArm9File,   0 },
-            { "Auto CTRNAND Transfer",        &NandTransfer,          N_NANDWRITE },
-            { "Dump transferable CTRNAND",    &DumpTransferable,      0 }
+            { "FIRM ARM9 Decryptor",          &DecryptFirmArm9File,   0 }
         }
     },
     {
-        "Miscellaneous... (EmuNAND)", 8, // ID 11
-        {
-            
+        "Miscellaneous... (EmuNAND)", 5, // ID 17
+        {            
             { "Health&Safety Dump",           &DumpHealthAndSafety,   N_EMUNAND },
             { "Health&Safety Inject",         &InjectHealthAndSafety, N_NANDWRITE | N_EMUNAND },
             { "Update SeedDB",                &UpdateSeedDb,          N_EMUNAND },
-            { "Autofix CTRNAND",              &AutoFixCtrnand,        N_NANDWRITE | N_EMUNAND },
             { "NCCH FIRMs Dump",              &DumpNcchFirms,         N_EMUNAND },
-            { "FIRM ARM9 Decryptor",          &DecryptFirmArm9File,   0 },
-            { "Auto CTRNAND Transfer",        &NandTransfer,          N_NANDWRITE | N_EMUNAND },
-            { "Dump transferable CTRNAND",    &DumpTransferable,      N_EMUNAND }
+            { "FIRM ARM9 Decryptor",          &DecryptFirmArm9File,   0 }
         }
     },
     {
-        "NCCH/NCSD File Options", 3, // ID 12
+        "NCCH/NCSD File Options", 3, // ID 18
         {
             { "NCCH/NCSD Decryptor",          &CryptGameFiles,        GC_NCCH_PROCESS },
             { "NCCH/NCSD Encryptor",          &CryptGameFiles,        GC_NCCH_PROCESS | GC_NCCH_ENC0x2C },
@@ -274,7 +312,7 @@ MenuInfo menu[] =
         }
     },
     {
-        "CIA File Options", 4, // ID 13
+        "CIA File Options", 4, // ID 19
         {
             { "CIA Decryptor (shallow)",      &CryptGameFiles,        GC_CIA_PROCESS },
             { "CIA Decryptor (deep)",         &CryptGameFiles,        GC_CIA_PROCESS | GC_CIA_DEEP },
@@ -283,14 +321,14 @@ MenuInfo menu[] =
         }
     },
     {
-        "BOSS File Options", 2, // ID 14
+        "BOSS File Options", 2, // ID 20
         {
             { "BOSS Decryptor",               &CryptGameFiles,        GC_BOSS_PROCESS },
             { "BOSS Encryptor",               &CryptGameFiles,        GC_BOSS_PROCESS | GC_BOSS_ENCRYPT }
         }
     },
     {
-        "SD File Options", 3, // ID 15
+        "SD File Options", 3, // ID 21
         {
             { "SD Decryptor/Encryptor",       &CryptSdFiles,          0 },
             { "SD Decryptor (SysNAND dir)",   &DecryptSdFilesDirect,  0 },
