@@ -155,7 +155,7 @@ u32 DebugSeekFileInNand(u32* offset, u32* size, const char* filename, const char
     return 0;
 }
 
-u32 SeekTitleInNandDb(u32* tid_low, u32* tmd_id, TitleListInfo* title_info)
+u32 SeekTitleInNandDb(u32 tid_high, u32 tid_low, u32* tmd_id)
 {
     PartitionInfo* ctrnand_info = GetPartitionInfo(P_CTRNAND);
     u8* titledb = (u8*) 0x20316000;
@@ -173,24 +173,18 @@ u32 SeekTitleInNandDb(u32* tid_low, u32* tmd_id, TitleListInfo* title_info)
     u8* info_data = titledb + 0x44B80;
     if ((getle32(entry_table + 0) != 2) || (getle32(entry_table + 4) != 3))
         return 1; // magic number not found
-    *tid_low = 0;
+    *tmd_id = (u32) -1;
     for (u32 i = 0; i < 1000; i++) {
         u8* entry = entry_table + 0xA8 + (0x2C * i);
         u8* info = info_data + (0x80 * i);
-        u32 r;
-        if (getle32(entry + 0xC) != title_info->tid_high) continue; // not a title id match
+        if ((getle32(entry + 0xC) != tid_high) || (getle32(entry + 0x8) != tid_low)) continue; // not a title id match
         if (getle32(entry + 0x4) != 1) continue; // not an active entry
         if ((getle32(entry + 0x18) - i != 0x162) || (getle32(entry + 0x1C) != 0x80) || (getle32(info + 0x08) != 0x40)) continue; // fishy title info / offset
-        for (r = 0; r < 6; r++) {
-            if ((title_info->tid_low[r] != 0) && (getle32(entry + 0x8) == title_info->tid_low[r])) break;
-        }
-        if (r >= 6) continue;
         *tmd_id = getle32(info + 0x14);
-        *tid_low = title_info->tid_low[r];
         break; 
     }
     
-    return (*tid_low) ? 0 : 1;
+    return (*tmd_id != (u32) -1) ? 0 : 1;
 }
 
 u32 DebugSeekTitleInNand(u32* offset_tmd, u32* size_tmd, u32* offset_app, u32* size_app, TitleListInfo* title_info, u32 max_cnt)
@@ -198,33 +192,36 @@ u32 DebugSeekTitleInNand(u32* offset_tmd, u32* size_tmd, u32* offset_app, u32* s
     PartitionInfo* ctrnand_info = GetPartitionInfo(P_CTRNAND);
     u8* buffer = (u8*) 0x20316000;
     u32 cnt_count = 0;
+    u32 tid_high = title_info->tid_high;
     u32 tid_low = 0;
-    u32 tmd_id = 0;
+    u32 tmd_id = (u32) -1;
+    
+    // get correct title id
+    u32 region = GetRegion();
+    if (region > 6)
+        return 1;
+    tid_low = title_info->tid_low[(region >= 3) ? region - 1 : region];
+    if (tid_low == 0) {
+        Debug("%s not available for region", title_info->name);
+        return 1;
+    }
     
     Debug("Searching title \"%s\"...", title_info->name);
     Debug("Method 1: Search in title.db...");
-    if (SeekTitleInNandDb(&tid_low, &tmd_id, title_info) == 0) {
+    if (SeekTitleInNandDb(tid_high, tid_low, &tmd_id) == 0) {
         char path[64];
-        sprintf(path, "TITLE      %08X   %08X   CONTENT    %08XTMD", (unsigned int) title_info->tid_high, (unsigned int) tid_low, (unsigned int) tmd_id);
+        sprintf(path, "TITLE      %08lX   %08lX   CONTENT    %08lXTMD", tid_high, tid_low, tmd_id);
         if (SeekFileInNand(offset_tmd, size_tmd, path, ctrnand_info) != 0)
-            tid_low = 0;
+            tmd_id = (u32) -1;
     }
-    if (!tid_low) {
+    if (tmd_id == (u32) -1) {
         Debug("Method 2: Search in file system...");
-        for (u32 i = 0; i < 6; i++) {
-            char path[64];
-            if (title_info->tid_low[i] == 0)
-                continue;
-            sprintf(path, "TITLE      %08X   %08X   CONTENT    ????????TMD", (unsigned int) title_info->tid_high, (unsigned int) title_info->tid_low[i]);
-            if (SeekFileInNand(offset_tmd, size_tmd, path, ctrnand_info) == 0) {
-                tid_low = title_info->tid_low[i];
-                break;
-            }
+        char path[64];
+        sprintf(path, "TITLE      %08lX   %08lX   CONTENT    ????????TMD", tid_high, tid_low);
+        if (SeekFileInNand(offset_tmd, size_tmd, path, ctrnand_info) != 0) {
+            Debug("Failed!");
+            return 1;
         }
-    }
-    if (!tid_low) {
-        Debug("Failed!");
-        return 1;
     }
     Debug("Found title %08X%08X", title_info->tid_high, tid_low);
     
