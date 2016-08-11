@@ -792,7 +792,7 @@ u32 AutoFixCtrnand(u32 param)
     FixNandCmac(F_NAGSAVE);
     FixNandCmac(F_NNIDSAVE);
     FixNandCmac(F_FRIENDSAVE);
-    FixNandCmac(F_FRIENDSAVE);
+    FixNandCmac(F_CONFIGSAVE);
     
     return 0;
 }
