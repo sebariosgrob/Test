@@ -88,8 +88,8 @@ MenuInfo menu[] =
             { "Dump & Decrypt Cart (full)",   &DumpGameCart,          CD_DECRYPT },
             { "Dump & Decrypt Cart (trim)",   &DumpGameCart,          CD_DECRYPT | CD_TRIM },
             { "Dump Cart to CIA",             &DumpGameCart,          CD_DECRYPT | CD_MAKECIA },
-            { "Dump NTR Cart (full)",         &DumpGameCart,          CD_NTRCART },
-            { "Dump NTR Cart (trim)",         &DumpGameCart,          CD_NTRCART | CD_TRIM },
+            { "Dump NTR/TWL Cart (full)",     &DumpGameCart,          CD_NTRCART },
+            { "Dump NTR/TWL Cart (trim)",     &DumpGameCart,          CD_NTRCART | CD_TRIM },
             { "Dump Private Header",          &DumpPrivateHeader,     0 }
         }
     },

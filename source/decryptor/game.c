@@ -1673,17 +1673,20 @@ u32 DumpCtrGameCart(u32 param)
     return result;
 }
 
-u32 DumpNtrGameCart(u32 param)
+u32 DumpTwlGameCart(u32 param)
 {
     char filename[64];
     u64 cart_size = 0;
     u64 data_size = 0;
     u64 dump_size = 0;
-    u8* buff = BUFFER_ADDRESS;
+    u8* dsibuff = BUFFER_ADDRESS;
+    u8* buff = BUFFER_ADDRESS+0x8000;
     u64 offset = 0x8000;
     char name[16];
+    u32 arm9iromOffset = -1;
+    int isDSi = 0;
 
-    memset (buff, 0x00, 0x4000);
+    memset (buff, 0x00, 0x8000);
 
 
     NTR_CmdReadHeader (buff);
@@ -1707,20 +1710,10 @@ u32 DumpNtrGameCart(u32 param)
     Debug("Cartridge used size: %lluMB", data_size / 0x100000);
     Debug("Cartridge dump size: %lluMB", dump_size / 0x100000);
 
-    //Unitcode (00h=NDS, 02h=NDS+DSi, 03h=DSi) (bit1=DSi)
-    if (buff[0x12] == 0x02) {
-        Debug ("Hybrid(DS+DSi) cartridge was detected");
-        Debug ("This dumper supports only DS mode");
-    }
-    else if (buff[0x12] != 0x00) {
-        Debug ("DSi Cartridge is not supported");
-        return 1;
-    }
-
-    if (!NTR_Secure_Init (buff, Cart_GetID())) {
+    if (!NTR_Secure_Init (buff, Cart_GetID(), 0)) {
         Debug("Error reading secure data");
         return 1;
-	}
+    }
 
     Debug("");
     snprintf(filename, 64, "/%s%s%s.nds", GetGameDir() ? GetGameDir() : "", GetGameDir() ? "/" : "", name);
@@ -1731,22 +1724,44 @@ u32 DumpNtrGameCart(u32 param)
         FileClose();
         return 1;
     }
+    
+    // Unitcode (00h=NDS, 02h=NDS+DSi, 03h=DSi) (bit1=DSi)
+    if (buff[0x12] != 0x00) {
+        isDSi = 1;
+        
+        // initialize cartridge
+        Cart_Init();
+        //Cart_GetID();
+        
+        NTR_CmdReadHeader (dsibuff);
+        
+        if (!NTR_Secure_Init (dsibuff, Cart_GetID(), 1)) {
+            Debug("Error reading dsi secure data");
+            //return 1;
+        }
+        
+        arm9iromOffset = *((u32*)&dsibuff[0x1C0]);
+    }
 
-	u32 stop = 0;
+    u32 stop = 0;
     for (offset=0x8000;offset < dump_size;offset+=CART_CHUNK_SIZE) {
-		if( (offset + CART_CHUNK_SIZE) > dump_size)
+        if( (offset + CART_CHUNK_SIZE) > dump_size)
             stop = (offset + CART_CHUNK_SIZE)-dump_size; // correct over-sized writes with "stop" variable
-		
-		for(u32 i=0;i < CART_CHUNK_SIZE;i+=0x200) {
-			NTR_CmdReadData (offset+i, buff+i);
-	    }
+        for(u32 i=0; i < CART_CHUNK_SIZE; i += 0x200) {
+            NTR_CmdReadData (offset+i, buff+i);
+        }
         if (!DebugFileWrite((void*) buff, CART_CHUNK_SIZE - stop, offset)) {
             FileClose();
             return 1;
         }
         ShowProgress(offset, dump_size);
     }
-	
+    
+    if (isDSi && !DebugFileWrite(dsibuff+0x4000, 0x4000, arm9iromOffset)) {
+        FileClose();
+        return 1;
+    }
+    
     FileClose ();
     ShowProgress(0, 0);
     return 0;
@@ -1777,7 +1792,7 @@ u32 DumpGameCart(u32 param)
         return 1;
     }
 
-    return (cartId & 0x10000000) ? DumpCtrGameCart(param) : DumpNtrGameCart(param);
+    return (cartId & 0x10000000) ? DumpCtrGameCart(param) : DumpTwlGameCart(param);
 }
 
 u32 DumpPrivateHeader(u32 param)

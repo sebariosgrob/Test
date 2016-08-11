@@ -72,7 +72,7 @@ void NTR_CryptDown(u32* pCardHash, u32* aPtr)
 // guaranteed to be random.
 #define getRandomNumber() (4)
 
-void NTR_InitKey1 (u8* aCmdData, IKEY1* pKey1)
+void NTR_InitKey1 (u8* aCmdData, IKEY1* pKey1, int iCardDevice)
 {
     pKey1->iii = getRandomNumber() & 0x00000fff;
     pKey1->jjj = getRandomNumber() & 0x00000fff;
@@ -81,7 +81,11 @@ void NTR_InitKey1 (u8* aCmdData, IKEY1* pKey1)
     pKey1->mmm = getRandomNumber() & 0x00000fff;
     pKey1->nnn = getRandomNumber() & 0x00000fff;
 
-    aCmdData[7] = NTRCARD_CMD_ACTIVATE_BF;
+    if(iCardDevice) //DSi
+      aCmdData[7]=NTRCARD_CMD_ACTIVATE_BF2;  //0x3D
+    else
+      aCmdData[7]=NTRCARD_CMD_ACTIVATE_BF;
+
     aCmdData[6] = (u8)(pKey1->iii >> 4);
     aCmdData[5] = (u8)((pKey1->iii << 4) | (pKey1->jjj >> 8));
     aCmdData[4] = (u8)pKey1->jjj;
@@ -112,23 +116,30 @@ void NTR_ApplyKey (u32* pCardHash, int nCardHash, u32* pKeyCode)
     }
 }
 
-void NTR_InitKey (u32 aGameCode, u32* pCardHash, int nCardHash, u32* pKeyCode, bool aType)
+void NTR_InitKey (u32 aGameCode, u32* pCardHash, int nCardHash, u32* pKeyCode, int level, int iCardDevice)
 {
-    //const u8* BlowfishTwl = (const u8*)0x01FFD3E0;
-    const u8* BlowfishNtr = (const u8*)0x01FFE428;
-
-    memcpy (pCardHash, BlowfishNtr, 0x1048);
+	if(iCardDevice)
+	{
+		const u8* BlowfishTwl = (const u8*)0x01FFD3E0;
+		memcpy (pCardHash, BlowfishTwl, 0x1048);
+	}
+	else
+    {
+		const u8* BlowfishNtr = (const u8*)0x01FFE428;
+		memcpy (pCardHash, BlowfishNtr, 0x1048);
+	}
+	
     pKeyCode[0] = aGameCode;
     pKeyCode[1] = aGameCode/2;
     pKeyCode[2] = aGameCode*2;
 
-	NTR_ApplyKey (pCardHash, nCardHash, pKeyCode);
-    NTR_ApplyKey (pCardHash, nCardHash, pKeyCode);
+	if (level >= 1) NTR_ApplyKey (pCardHash, nCardHash, pKeyCode);
+    if (level >= 2) NTR_ApplyKey (pCardHash, nCardHash, pKeyCode);
 
     pKeyCode[1] = pKeyCode[1]*2;
     pKeyCode[2] = pKeyCode[2]/2;
 
-    if(aType) NTR_ApplyKey (pCardHash, nCardHash, pKeyCode);
+    if (level >= 3) NTR_ApplyKey (pCardHash, nCardHash, pKeyCode);
 }
 
 void NTR_CreateEncryptedCommand (u8 aCommand, u32* pCardHash, u8* aCmdData, IKEY1* pKey1, u32 aBlock)
@@ -159,11 +170,11 @@ void NTR_CreateEncryptedCommand (u8 aCommand, u32* pCardHash, u8* aCmdData, IKEY
     pKey1->kkkkk+=1;
 }
 
-void NTR_DecryptSecureArea (u32 aGameCode, u32* pCardHash, int nCardHash, u32* pKeyCode, u32* pSecureArea)
+void NTR_DecryptSecureArea (u32 aGameCode, u32* pCardHash, int nCardHash, u32* pKeyCode, u32* pSecureArea, int iCardDevice)
 {
-    NTR_InitKey (aGameCode, pCardHash, nCardHash, pKeyCode, false);
+    NTR_InitKey (aGameCode, pCardHash, nCardHash, pKeyCode, 2, iCardDevice);
     NTR_CryptDown(pCardHash, pSecureArea);
-    NTR_InitKey(aGameCode, pCardHash, nCardHash, pKeyCode, true);
+    NTR_InitKey(aGameCode, pCardHash, nCardHash, pKeyCode, 3, iCardDevice);
     for(int ii=0;ii<0x200;ii+=2) NTR_CryptDown (pCardHash, pSecureArea + ii);
 }
 
@@ -195,7 +206,7 @@ void NTR_CmdSecure (u32 flags, void* buffer, u32 length, u8* pcmd, u32 Delay)
     cardPolledTransfer (flags, buffer, length, pcmd);
 }
 
-bool NTR_Secure_Init (u8* header, u32 CartID)
+bool NTR_Secure_Init (u8* header, u32 CartID, int iCardDevice)
 {
 	u32 iGameCode;
     u32 iCardHash[0x412] = {0};
@@ -208,19 +219,19 @@ bool NTR_Secure_Init (u8* header, u32 CartID)
     u32 cardControl13 = *((u32*)&header[0x60]);
     u32 cardControlBF = *((u32*)&header[0x64]);
 	u16 readTimeout = *((u16*)&header[0x6E]); readTimeout*=8;
-	u8 deviceType = *((u8*)&header[0x13]);
+	u8 deviceType = header[0x13];
 	int nCardHash = sizeof (iCardHash) / sizeof (iCardHash[0]);
     u32 flagsKey1=NTRCARD_ACTIVATE|NTRCARD_nRESET|(cardControl13&(NTRCARD_WR|NTRCARD_CLK_SLOW))|((cardControlBF&(NTRCARD_CLK_SLOW|NTRCARD_DELAY1(0x1FFF)))+((cardControlBF&NTRCARD_DELAY2(0x3F))>>16));
     u32 flagsSec=(cardControlBF&(NTRCARD_CLK_SLOW|NTRCARD_DELAY1(0x1FFF)|NTRCARD_DELAY2(0x3F)))|NTRCARD_ACTIVATE|NTRCARD_nRESET|NTRCARD_SEC_EN|NTRCARD_SEC_DAT;
 
     iGameCode = *((u32*)&header[0x0C]);
     ReadDataFlags = cardControl13 & ~ NTRCARD_BLK_SIZE(7);
-    NTR_InitKey (iGameCode, iCardHash, nCardHash, iKeyCode, false);
+    NTR_InitKey (iGameCode, iCardHash, nCardHash, iKeyCode, iCardDevice?1:2, iCardDevice);
 
     if(!iCheapCard) flagsKey1 |= NTRCARD_SEC_LARGE;
     //Debug("iCheapCard=%d, readTimeout=%d", iCheapCard, readTimeout);
 
-	NTR_InitKey1 (cmdData, &iKey1);
+	NTR_InitKey1 (cmdData, &iKey1, iCardDevice);
     //Debug("cmdData=%02X %02X %02X %02X %02X %02X %02X %02X ", cmdData[0], cmdData[1], cmdData[2], cmdData[3], cmdData[4], cmdData[5], cmdData[6], cmdData[7]);
     //Debug("iKey1=%08X %08X %08X", iKey1.iii, iKey1. jjj, iKey1. kkkkk);
     //Debug("iKey1=%08X %08X %08X", iKey1. llll, iKey1. mmm, iKey1. nnn);
@@ -287,7 +298,11 @@ bool NTR_Secure_Init (u8* header, u32 CartID)
     }
     NTR_CmdSecure (flagsKey1, NULL, 0, cmdData, readTimeout);
 
-    NTR_DecryptSecureArea (iGameCode, iCardHash, nCardHash, iKeyCode, secureArea);
+    if(!iCardDevice) //CycloDS doesn't like the dsi secure area being decrypted
+    {
+		NTR_DecryptSecureArea (iGameCode, iCardHash, nCardHash, iKeyCode, secureArea, iCardDevice);
+	}
+
     //Debug("secure area %08X %08X", secureArea[0], secureArea[1]);
     if(secureArea[0] == 0x72636e65/*'encr'*/ && secureArea[1] == 0x6a624f79/*'yObj'*/)
     {
@@ -297,7 +312,8 @@ bool NTR_Secure_Init (u8* header, u32 CartID)
     else
     {
         Debug("Invalid secure area.(%08X %08X)", secureArea[0], secureArea[1]);
-        return false;
+        //dragon quest 5 has invalid secure area. really.
+		//return false;
     }
 
     return true;

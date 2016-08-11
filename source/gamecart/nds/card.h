@@ -48,6 +48,7 @@
 #define CARD_CMD_HEADER_READ    0x00u
 #define CARD_CMD_HEADER_CHIPID  0x90u
 #define CARD_CMD_ACTIVATE_BF    0x3Cu  // Go into blowfish (KEY1) encryption mode
+#define CARD_CMD_ACTIVATE_BF2   0x3Du  // Go into blowfish (KEY1) encryption mode
 #define CARD_CMD_ACTIVATE_SEC   0x40u  // Go into hardware (KEY2) encryption mode
 #define CARD_CMD_SECURE_CHIPID  0x10u
 #define CARD_CMD_SECURE_READ    0x20u
