@@ -20,7 +20,7 @@
 #define F_NNIDSAVE    (1<<12)
 #define F_FRIENDSAVE  (1<<13)
 #define F_CONFIGSAVE  (1<<14)
-#define FF_AUTONAME   (1<<31)
+#define FF_AUTONAME   (1<<20)
 
 typedef struct {
     char name[32];
