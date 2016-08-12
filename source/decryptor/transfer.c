@@ -73,19 +73,9 @@ u32 NandTransfer(u32 param) {
     }
     // region check
     if (region != sha256[0x20]) {
-        if (!a9lh) {
-            Debug("Region does not match");
+        Debug("Region does not match");
+        if (!a9lh)
             return 1;
-        } else {
-            u8 secureinfo[0x111];
-            do {
-                Debug("Region does not match, select SecureInfo_A file");
-                if (InputFileNameSelector(secnfoname, "SecureInfo_A", NULL, NULL, 0, 0x111, false) != 0)
-                    return 1;
-                if (FileGetData(secnfoname, secureinfo, 0x111, 0) != 0x111)
-                    return 1;
-            } while (region != (u32) secureinfo[0x100]);
-        }
     }
     
     Debug("");
