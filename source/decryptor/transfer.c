@@ -10,11 +10,13 @@
 
 u32 NandTransfer(u32 param) {
     PartitionInfo* p_info = GetPartitionInfo(P_CTRFULL);
-    u8* buffer = BUFFER_ADDRESS;
+    PartitionInfo* p_firm0 = GetPartitionInfo(P_FIRM0);
+    PartitionInfo* p_firm1 = GetPartitionInfo(P_FIRM1);
+    u8* firm = BUFFER_ADDRESS;
     char filename[64] = { 0 };
     char secnfoname[64] = { 0 };
     char hashname[64] = { 0 };
-    bool a9lh = ((*(u32*) 0x101401C0) == 0);
+    bool a9lh = !(param & N_EMUNAND) && ((*(u32*) 0x101401C0) == 0);
     u32 region = GetRegion();
     u32 imgsize = 0;
     
@@ -34,6 +36,18 @@ u32 NandTransfer(u32 param) {
         Debug("This does not work on N3DS with O3DS FW");
         Debug("Restore a NAND backup first");
         return 1;
+    }
+    
+    // deeper check for a9lh
+    if (!(param & N_EMUNAND) && !a9lh) {
+        Debug("A9LH not detected, checking FIRM1...");
+        if (DecryptNandToMem(firm, p_firm0->offset, p_firm0->size, p_firm0) != 0)
+            return 1;
+        if (CheckFirmSize(firm, p_firm0->size) == 0) {
+            Debug("Not running from A9LH, but FIRM0 corrupted");
+            Debug("Fix your FIRM0 or run from A9LH");
+            return 1;
+        }
     }
     
     // select CTRNAND image for transfer
@@ -84,7 +98,7 @@ u32 NandTransfer(u32 param) {
     Debug("Step #1 success!");
     
     Debug("");
-    Debug("Step #2: Dumping transfer files...");
+    Debug("Step #2: Dumping transfer files");
     if ((DumpNandFile(FF_AUTONAME | F_MOVABLE) != 0) ||
         (DumpNandFile(FF_AUTONAME | F_TICKET) != 0) ||
         (DumpNandFile(FF_AUTONAME | F_CONFIGSAVE) != 0) ||
@@ -96,7 +110,7 @@ u32 NandTransfer(u32 param) {
     // check NAND header, restore if required (!!!)
     
     Debug("");
-    Debug("Step #3: Injecting CTRNAND transfer image...");
+    Debug("Step #3: Injecting CTRNAND transfer image");
     if (p_info->size != imgsize) {
         if (GetUnitPlatform() != PLATFORM_N3DS) // extra safety
             return 1;
@@ -113,7 +127,7 @@ u32 NandTransfer(u32 param) {
     Debug("Step #3 success!");
     
     Debug("");
-    Debug("Step #4: Injecting transfer files...");
+    Debug("Step #4: Injecting transfer files");
     if ((InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_MOVABLE) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_TICKET) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_CONFIGSAVE) != 0) ||
@@ -131,7 +145,7 @@ u32 NandTransfer(u32 param) {
     Debug("Step #4 success!");
     
     Debug("");
-    Debug("Step #5: Fixing CMACs and paths...");
+    Debug("Step #5: Fixing CMACs and paths");
     if (AutoFixCtrnand(N_NANDWRITE) != 0)
         return 1;
     Debug("Step #5 success!");
@@ -142,10 +156,7 @@ u32 NandTransfer(u32 param) {
     }
     
     Debug("");
-    Debug("Step #6: Dumping and injecting NATIVE_FIRM...");
-    PartitionInfo* p_firm0 = GetPartitionInfo(P_FIRM0);
-    PartitionInfo* p_firm1 = GetPartitionInfo(P_FIRM1);
-    u8* firm = buffer;
+    Debug("Step #6: Dumping and injecting NATIVE_FIRM");
     u32 firm_size = 0;
     if (DumpNcchFirm((p_info->keyslot == 0x4) ? 4 : 0, false, false) == 0) {
         Debug("NATIVE_FIRM found, injecting...");
