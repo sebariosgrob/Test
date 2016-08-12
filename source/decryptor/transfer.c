@@ -79,6 +79,12 @@ u32 NandTransfer(u32 param) {
     }
     
     Debug("");
+    Debug("Step #0: Optional NAND backup");
+    Debug("Press <B> to skip and continue without backup");
+    if (DumpNand(NB_MINSIZE) == 1)
+        return 1;
+    
+    Debug("");
     Debug("Step #1: .SHA verification of CTRNAND image...");
     Debug("Checking hash from .SHA file...");
     if (CheckHashFromFile(filename, 0, 0, sha256) != 0) {
