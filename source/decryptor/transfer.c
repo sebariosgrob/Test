@@ -198,12 +198,16 @@ u32 DumpTransferable(u32 param) {
         return 1;
     }
     
+    // check free space
+    p_info = GetPartitionInfo(P_CTRFULL);
+    if (!DebugCheckFreeSpace(p_info->size))
+        return 1;
+    
     Debug("");
     Debug("Creating transferable CTRNAND, size (MB): %u", p_info->size / (1024 * 1024));
     Debug("Select name for transfer file");
     if (OutputFileNameSelector(filename, "ctrtransfer", "bin") != 0)
         return 1;
-    p_info = GetPartitionInfo(P_CTRFULL);
     if (DecryptNandToFile(filename, p_info->offset, p_info->size, p_info, sha256) != 0)
         return 1;
     
