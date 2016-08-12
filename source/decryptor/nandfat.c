@@ -457,7 +457,7 @@ u32 FixNandCmac(u32 param) {
         memcpy(temp + 0x10, data + 0x100, 0x100);
         if ((FixCmac(data, temp, 0x110, 0x30) != 0) && (EncryptMemToNand(data, offset, 0x200, p_info) != 0))
             return 1;
-    } else if ((param == F_MOVABLE) && (size == 0x140)) { // movable.sed
+    } else if ((param & F_MOVABLE) && (size == 0x140)) { // movable.sed
         if ((FixCmac(data + 0x130, data, 0x130, 0x0B) != 0) && (EncryptMemToNand(data, offset, 0x200, p_info) != 0))
             return 1;
     } else {
@@ -524,22 +524,9 @@ u32 InjectNandFile(u32 param)
     if (EncryptFileToNand(filename, offset, size, p_info) != 0)
         return 1;
     
-    // fix CMACs for .db files
-    if (f_info - fileList < 6) {
-        u32 id = f_info - fileList;
-        u8 header[0x200];
-        u8 temp[0x200];
-        Debug("Also checking internal .db CMAC...");
-        if (FileGetData(filename, header, 0x200, 0) != 0x200)
-            return 1;
-        memcpy(temp + 0x0, "CTR-9DB0", 8);
-        memcpy(temp + 0x8, &id, 4);
-        memcpy(temp + 0xC, header + 0x100, 0x100);
-        if ((FixCmac(header, temp, 0x10C, 0x0B) != 0) && (EncryptMemToNand(header, offset, 0x200, p_info) != 0))
-            return 1;
-    }
-    
-    // CMACs for system saves?
+    // fix CMAC for file
+    Debug("Fixing file CMAC for console...");
+    FixNandCmac(param);
     
     return 0;
 }
