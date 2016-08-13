@@ -7,6 +7,9 @@
 #include "fatfs/sdmmc.h"
 #include "NCSD_header_o3ds_hdr.h"
 
+#define O3DS_TRANSFER_SIZE  0x2F5D0000
+#define N3DS_TRANSFER_SIZE  0x41ED0000
+
 
 u32 NandTransfer(u32 param) {
     PartitionInfo* p_info = GetPartitionInfo(P_CTRFULL);
@@ -14,7 +17,6 @@ u32 NandTransfer(u32 param) {
     PartitionInfo* p_firm1 = GetPartitionInfo(P_FIRM1);
     u8* firm = BUFFER_ADDRESS;
     char filename[64] = { 0 };
-    char secnfoname[64] = { 0 };
     char hashname[64] = { 0 };
     bool a9lh = !(param & N_EMUNAND) && ((*(u32*) 0x101401C0) == 0);
     u32 region = GetRegion();
@@ -40,7 +42,7 @@ u32 NandTransfer(u32 param) {
     
     // deeper check for a9lh
     if (!(param & N_EMUNAND) && !a9lh) {
-        Debug("A9LH not detected, checking FIRM1...");
+        Debug("A9LH not detected, checking FIRM0...");
         if (DecryptNandToMem(firm, p_firm0->offset, p_firm0->size, p_firm0) != 0)
             return 1;
         if (CheckFirmSize(firm, p_firm0->size) == 0) {
@@ -52,14 +54,14 @@ u32 NandTransfer(u32 param) {
     
     // select CTRNAND image for transfer
     Debug("Select CTRNAND transfer image");
-    if (InputFileNameSelector(filename, "ctrtransfer", "bin", NULL, 0, 0x2F5D0000, true) != 0) // use O3DS size as minimum
-        return 1;
+    if (InputFileNameSelector(filename, "ctrtransfer", "bin", NULL, 0, O3DS_TRANSFER_SIZE, true) != 0)
+        return 1; // use O3DS size as minimum
     // check size of image
     if (!FileOpen(filename) || !(imgsize = FileGetSize()))
         return 1;
     FileClose();
-    if (((GetUnitPlatform() == PLATFORM_3DS) && (imgsize != 0x2F5D0000)) || // only O3DS size allowed on O3DS
-        ((GetUnitPlatform() == PLATFORM_N3DS) && (imgsize != 0x2F5D0000) && (imgsize != 0x41ED0000))) {
+    if (((GetUnitPlatform() == PLATFORM_3DS) && (imgsize != O3DS_TRANSFER_SIZE)) || // only O3DS size allowed on O3DS
+        ((GetUnitPlatform() == PLATFORM_N3DS) && (imgsize != O3DS_TRANSFER_SIZE) && (imgsize != N3DS_TRANSFER_SIZE))) {
         Debug("Image has wrong size");
         return 1;
     }
@@ -128,16 +130,8 @@ u32 NandTransfer(u32 param) {
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_TICKET) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_CONFIGSAVE) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_LOCALFRIEND) != 0) ||
-        (*secnfoname && (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_SECUREINFO) != 0)))
+        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_SECUREINFO) != 0))
         return 1;
-    if (*secnfoname) {
-        u32 offset;
-        u32 size;
-        if (DebugSeekFileInNand(&offset, &size, "SecureInfo_A", "RW         SYS        SECURE~?   ", p_info) != 0)
-            return 1;
-        if (EncryptFileToNand(secnfoname, offset, size, p_info) != 0)
-            return 1;
-    }
     Debug("Step #4 success!");
     
     Debug("");
