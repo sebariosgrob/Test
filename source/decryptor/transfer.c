@@ -33,13 +33,6 @@ u32 NandTransfer(u32 param) {
         return 1;
     }
     
-    // check crypto type
-    if ((GetUnitPlatform() == PLATFORM_N3DS) && (p_info->keyslot == 0x04)) {
-        Debug("This does not work on N3DS with O3DS FW");
-        Debug("Restore a NAND backup first");
-        return 1;
-    }
-    
     // deeper check for a9lh
     if (!(param & N_EMUNAND) && !a9lh) {
         Debug("A9LH not detected, checking FIRM0...");
@@ -110,10 +103,13 @@ u32 NandTransfer(u32 param) {
     Debug("");
     Debug("Step #3: Injecting CTRNAND transfer image");
     if (p_info->size != imgsize) {
-        if (GetUnitPlatform() != PLATFORM_N3DS) // extra safety
+        if (GetUnitPlatform() != PLATFORM_N3DS) // extra safety, not actually needed
             return 1;
         Debug("Switching out NAND header first...");
-        if ((NCSD_header_o3ds_hdr_size != 0x200) || (PutNandHeader((u8*) NCSD_header_o3ds_hdr) != 0))
+        if ((imgsize == O3DS_TRANSFER_SIZE) & // use hardcoded o3ds header
+            ((NCSD_header_o3ds_hdr_size != 0x200) || (PutNandHeader((u8*) NCSD_header_o3ds_hdr) != 0)))
+            return 1;
+        else if ((imgsize == N3DS_TRANSFER_SIZE) && (PutNandHeader(NULL) != 0)) // use N3DS header backup
             return 1;
         p_info = GetPartitionInfo(P_CTRFULL);
         if (p_info->size != imgsize)

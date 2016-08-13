@@ -956,16 +956,19 @@ u32 PutNandHeader(u8* header)
     
     if (header) { // inject provided header
         // make a backup of the genuine header @0x200 (if genuine)
-        if (ReadNandSectors(0, 1, header_old) && (CheckNandHeaderIntegrity(header_old) == 0))
+        if ((ReadNandSectors(0, 1, header_old) == 0) && (CheckNandHeaderIntegrity(header_old) == 0))
             WriteNandSectors(1, 1, header_old); // only basic checks here - this is for last resort
         // write provided header
         if (WriteNandSectors(0, 1, header) != 0) {
             Debug("%sNAND write error", (emunand_header) ? "Emu" : "Sys");
             return 1;
         }
-    } else {
+    } else { // header == NULL -> restore genuine header
+        // check if current header is genuine, if its -> done
+        if ((ReadNandSectors(0, 1, header_old) == 0) && (CheckNandHeaderIntegrity(header_old) == 0))
+            return 0; 
         // grab the genuine header backup @0x200
-        if (ReadNandSectors(1, 1, header_old) && (CheckNandHeaderIntegrity(header_old) != 0)) {
+        if ((ReadNandSectors(1, 1, header_old) == 0) && (CheckNandHeaderIntegrity(header_old) != 0)) {
             Debug("Header backup not found");
             return 1;
         }
