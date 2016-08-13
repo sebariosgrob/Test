@@ -402,7 +402,7 @@ u32 InitializeD9()
             if (LoadKeyFromFile(0x1B, 'X', NULL)) // NCCH Secure4 KeyX
                 errorlevel = (errorlevel < 1) ? 1 : errorlevel;
         }
-        if (LoadKeyFromFile(0x24, 'Y', NULL)) // AGBSAVE CMAC KeyY
+        if (SetupAgbCmacKeyY0x24()) // AGBSAVE CMAC KeyY
             errorlevel = (errorlevel < 1) ? 1 : errorlevel;
         Debug("Finalizing Initialization...");
         RemainingStorageSpace();

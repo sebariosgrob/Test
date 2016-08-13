@@ -25,6 +25,7 @@ u32 SetupSector0x96Key0x11(void);
 u32 SetupSecretKey0x11(u32 keynum);
 u32 SetupTwlKey0x03(void);
 u32 SetupCtrNandKeyY0x05(void);
+u32 SetupAgbCmacKeyY0x24(void);
 u32 GetUnitKeysType(void);
 u32 LoadKeyFromFile(u32 keyslot, char type, char* id);
 u32 CheckKeySlot(u32 keyslot, char type);
