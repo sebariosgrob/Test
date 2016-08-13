@@ -612,6 +612,11 @@ u32 DecryptNandToMem(u8* buffer, u32 offset, u32 size, PartitionInfo* partition)
     CryptBufferInfo info = {.keyslot = partition->keyslot, .setKeyY = 0, .size = size, .buffer = buffer, .mode = partition->mode};
     if(GetNandCtr(info.ctr, offset) != 0)
         return 1;
+    
+    if (offset % NAND_SECTOR_SIZE) {
+        Debug("Bad NAND offset alignment");
+        return 1;
+    }
 
     u32 n_sectors = (size + NAND_SECTOR_SIZE - 1) / NAND_SECTOR_SIZE;
     u32 start_sector = offset / NAND_SECTOR_SIZE;
@@ -803,6 +808,11 @@ u32 EncryptMemToNand(u8* buffer, u32 offset, u32 size, PartitionInfo* partition)
     CryptBufferInfo info = {.keyslot = partition->keyslot, .setKeyY = 0, .size = size, .buffer = buffer, .mode = partition->mode};
     if(GetNandCtr(info.ctr, offset) != 0)
         return 1;
+    
+    if (offset % NAND_SECTOR_SIZE) {
+        Debug("Bad NAND offset alignment");
+        return 1;
+    }
 
     u32 n_sectors = (size + NAND_SECTOR_SIZE - 1) / NAND_SECTOR_SIZE;
     u32 start_sector = offset / NAND_SECTOR_SIZE;
@@ -824,12 +834,16 @@ u32 EncryptFileToNand(const char* filename, u32 offset, u32 size, PartitionInfo*
         return 1;
     
     u32 fsize = FileGetSize();
-    if (align(fsize, 0x200) == align(size, 0x200)) {
-        size = fsize;
-    } else if (fsize != size) {
-        Debug("%s has wrong size", filename);
-        FileClose();
-        return 1;
+    if (fsize != size) {
+        if (align(fsize, NAND_SECTOR_SIZE) == align(size, NAND_SECTOR_SIZE)) {
+            Debug("Warning: %s minor size mismatch", filename);
+            Debug("(handled automatically)");
+            size = fsize;
+        } else {
+            Debug("%s has wrong size", filename);
+            FileClose();
+            return 1;
+        }
     }
 
     for (u32 i = 0; i < size; i += NAND_SECTOR_SIZE * SECTORS_PER_READ) {
