@@ -173,13 +173,11 @@ This category includes all features that allow the decryption (and encryption) o
 
 ### Gamecart Dumper Options
 This category includes all features handling dumping of content from external cartridges. Cartridge dumps are also known as .3ds files.
-* __Dump Cart (full)__: This feature dumps the full, unaltered data from the inserted cartridge. For 4GB cartridges, the last sector is silently discarded, because the FAT32 file system can't handle files equal or above 4GB.
+* __Dump Cart (full)__: This feature dumps the full, unaltered data from the inserted cartridge. For 4GB cartridges, the last sector is silently discarded, because the FAT32 file system can't handle files equal or above 4GB. This feature also handles NTR/TWL cartridges (aka. NDS and DSi crtridges).
 * __Dump Cart (trim)__: Same as the above feature, but discards the unused padding for smaller output and faster processing. Using this is recommended unless the padding is required for digital preservation purposes.
-* __Dump & Decrypt Cart (full)__: Same as 'Dump Cart (full)', but also decrypts the cartridge data on-the-fly. Decrypted cartridge data is required for emulators and recommended for CIA conversion. The recommended CIA conversion tool is [3dsconv](https://github.com/ihaveamac/3dsconv).
+* __Dump & Decrypt Cart (full)__: Same as 'Dump Cart (full)', but also decrypts the cartridge data on-the-fly. Decrypted cartridge data is required for emulators and recommended for CIA conversion. The recommended CIA conversion tool is [3dsconv](https://github.com/ihaveamac/3dsconv). NTR/TWL cartridges are not encrypted and thus won't be decrypted.
 * __Dump & Decrypt Cart (trim)__: Same as above, but discards the unused padding for smaller output and faster processing. This is recommended over the above feature.
-* __Dump Cart to CIA__: Use this to directly dump an inserted cartridge to a fully decrypted CIA file, which can be installed to a patched system using CIA installer software like [FBI](https://github.com/Steveice10/FBI/releases). For most users, this type of dump will be the most convenient.
-* __Dump NTR Cart (full)__: This feature dumps the full data from an inserted Nintendo DS cartridge.
-* __Dump NTR Cart (trim)__: Same as the above, but discards the unused padding for smaller output and faster processing.
+* __Dump Cart to CIA__: Use this to directly dump an inserted cartridge to a fully decrypted CIA file, which can be installed to a patched system using CIA installer software like [FBI](https://github.com/Steveice10/FBI/releases). For most users, this type of dump will be the most convenient. NTR/TWL cartridges can't be dumped to a CIA file.
 * __Dump Private Header__: Dumps the cartridge unique private header from the inserted cartridge.
 
 ### Maintenance Options

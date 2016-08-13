@@ -1781,15 +1781,15 @@ u32 DumpGameCart(u32 param)
     Cart_Init();
     cartId = Cart_GetID();
     Debug("Cartridge ID: %08X", Cart_GetID());
-    Debug("Cartridge Type: %s", (cartId & 0x10000000) ? "CTR" : "NTR");
+    Debug("Cartridge Type: %s", (cartId & 0x10000000) ? "CTR" : "NTR/TWL");
     
-    // check cartridge type
-    if ((cartId & 0x10000000) && (param & CD_NTRCART)) {
-        Debug("NTR cart dump selected but CTR detected");
+    // check options vs. cartridge type
+    if (!(cartId & 0x10000000) && (param & CD_MAKECIA)) {
+        Debug("NTR/TWL carts can't be dumped to CIA");
         return 1;
-    } else if (!(cartId & 0x10000000) && !(param & CD_NTRCART)) {
-        Debug("CTR cart dump selected but NTR detected");
-        return 1;
+    }
+    if (!(cartId & 0x10000000) && (param & CD_DECRYPT)) {
+        Debug("NTR/TWL carts are not encrypted, won' decrypt");
     }
 
     return (cartId & 0x10000000) ? DumpCtrGameCart(param) : DumpTwlGameCart(param);
