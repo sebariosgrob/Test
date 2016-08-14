@@ -1789,7 +1789,7 @@ u32 DumpGameCart(u32 param)
         return 1;
     }
     if (!(cartId & 0x10000000) && (param & CD_DECRYPT)) {
-        Debug("NTR/TWL carts are not encrypted, won' decrypt");
+        Debug("NTR/TWL carts are not encrypted, won't decrypt");
     }
 
     return (cartId & 0x10000000) ? DumpCtrGameCart(param) : DumpTwlGameCart(param);
