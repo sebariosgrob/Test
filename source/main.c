@@ -124,17 +124,19 @@ MenuInfo menu[] =
         }
     },
     {
-        "SysNAND Transfer Options", 3, // ID 2
+        "SysNAND Transfer Options", 4, // ID 2
         {
             { "Auto CTRNAND Transfer",        &NandTransfer,          N_NANDWRITE },
+            { "Forced CTRNAND Transfer",      &NandTransfer,          N_NANDWRITE | TF_FORCED },
             { "Dump transferable CTRNAND",    &DumpTransferable,      0 },
             { "Autofix CTRNAND",              &AutoFixCtrnand,        N_NANDWRITE }
         }
     },
     {
-        "EmuNAND Transfer Options", 3, // ID 3
+        "EmuNAND Transfer Options", 4, // ID 3
         {
             { "Auto CTRNAND Transfer",        &NandTransfer,          N_NANDWRITE | N_EMUNAND },
+            { "Forced CTRNAND Transfer",      &NandTransfer,          N_NANDWRITE | N_EMUNAND | TF_FORCED },
             { "Dump transferable CTRNAND",    &DumpTransferable,      N_EMUNAND },
             { "Autofix CTRNAND",              &AutoFixCtrnand,        N_NANDWRITE | N_EMUNAND }
         }

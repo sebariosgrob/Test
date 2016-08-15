@@ -4,6 +4,7 @@
 #include "decryptor/hashfile.h"
 #include "decryptor/nand.h"
 #include "decryptor/nandfat.h"
+#include "decryptor/transfer.h"
 #include "fatfs/sdmmc.h"
 #include "NCSD_header_o3ds_hdr.h"
 
@@ -60,17 +61,21 @@ u32 NandTransfer(u32 param) {
     }
     
     // SHA / region check
-    u8 sha256[0x21]; // this needs a 0x20 + 0x01 byte .SHA file
-    snprintf(hashname, 64, "%s.sha", filename);
-    if (FileGetData(hashname, sha256, 0x21, 0) != 0x21) {
-        Debug(".SHA file not found or too small");
-        return 1;
-    }
-    // region check
-    if (region != sha256[0x20]) {
-        Debug("Region does not match");
-        if (!a9lh)
+    if (param & TF_FORCED) {
+        Debug("Forced transfer, not checking region");
+    } else {
+        u8 sha256[0x21]; // this needs a 0x20 + 0x01 byte .SHA file
+        snprintf(hashname, 64, "%s.sha", filename);
+        if (FileGetData(hashname, sha256, 0x21, 0) != 0x21) {
+            Debug(".SHA file not found or too small");
             return 1;
+        }
+        // region check
+        if (region != sha256[0x20]) {
+            Debug("Region does not match");
+            if (!a9lh)
+                return 1;
+        }
     }
     
     Debug("");
@@ -81,21 +86,29 @@ u32 NandTransfer(u32 param) {
     
     Debug("");
     Debug("Step #1: .SHA verification of CTRNAND image...");
-    Debug("Checking hash from .SHA file...");
-    if (CheckHashFromFile(filename, 0, 0, sha256) != 0) {
-        Debug("Failed, image corrupt or modified!");
-        return 1;
+    if (param & TF_FORCED) {
+        Debug("Forced transfer, skipping this step");
+        Debug("Step #1 skipped");
+    } else {
+        Debug("Checking hash from .SHA file...");
+        if (HashVerifyFile(filename) != 0) {
+            Debug("Failed, image corrupt or modified!");
+            return 1;
+        }
+        Debug("Step #1 success!");
     }
-    Debug("Step #1 success!");
     
     Debug("");
     Debug("Step #2: Dumping transfer files");
-    if ((DumpNandFile(FF_AUTONAME | F_MOVABLE) != 0) ||
-        (DumpNandFile(FF_AUTONAME | F_TICKET) != 0) ||
-        (DumpNandFile(FF_AUTONAME | F_CONFIGSAVE) != 0) ||
+    if ((DumpNandFile(FF_AUTONAME | F_SECUREINFO) != 0) ||
+        (DumpNandFile(FF_AUTONAME | F_MOVABLE) != 0) ||
         (DumpNandFile(FF_AUTONAME | F_LOCALFRIEND) != 0) ||
-        (DumpNandFile(FF_AUTONAME | F_SECUREINFO) != 0))
-        return 1;
+        (DumpNandFile(FF_AUTONAME | F_TICKET) != 0) ||
+        (DumpNandFile(FF_AUTONAME | F_CONFIGSAVE) != 0)) {
+        if (!(param & TF_FORCED))
+            return 1;
+        Debug("Forced transfer, ignoring errors");
+    }
     Debug("Step #2 success!");
         
     // check NAND header, restore if required (!!!)
@@ -122,12 +135,15 @@ u32 NandTransfer(u32 param) {
     
     Debug("");
     Debug("Step #4: Injecting transfer files");
-    if ((InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_MOVABLE) != 0) ||
-        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_TICKET) != 0) ||
-        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_CONFIGSAVE) != 0) ||
+    if ((InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_SECUREINFO) != 0) ||
+        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_MOVABLE) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_LOCALFRIEND) != 0) ||
-        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_SECUREINFO) != 0))
-        return 1;
+        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_TICKET) != 0) ||
+        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_CONFIGSAVE) != 0)) {
+        if (!(param & TF_FORCED))
+            return 1;
+        Debug("Forced transfer, ignoring errors");
+    }
     Debug("Step #4 success!");
     
     Debug("");
