@@ -145,9 +145,10 @@ u32 NandTransfer(u32 param) {
     Debug("");
     Debug("Step #4: Injecting transfer files");
     if (secnfo) {
+        PartitionInfo* p_fat = GetPartitionInfo(P_CTRNAND);
         u32 offset;
         u32 size;
-        if ((DebugSeekFileInNand(&offset, &size, "SecureInfo_A", "RW         SYS        SECURE~?   ", p_info) != 0) ||
+        if ((DebugSeekFileInNand(&offset, &size, "SecureInfo_A", "RW         SYS        SECURE~?   ", p_fat) != 0) ||
             (size != 0x111))
             return 1;
         if (EncryptMemToNand(secnfo_data, offset, 0x111, p_info) != 0)
