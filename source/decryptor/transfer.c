@@ -79,7 +79,7 @@ u32 NandTransfer(u32 param) {
             if (!a9lh) {
                 char secnfoname[64];
                 snprintf(secnfoname, 64, "%s.secnfo", filename);
-                if ((FileGetData(secnfoname, secnfo_data, 0x111, 0) != 0x111) || (region != secnfo_data[0x100]))
+                if ((FileGetData(secnfoname, secnfo_data, 0x111, 0) != 0x111) || (sha256[0x20] != secnfo_data[0x100]))
                     return 1;
                 Debug("Using provided .secnfo file");
                 secnfo = true;
