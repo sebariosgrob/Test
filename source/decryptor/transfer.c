@@ -112,7 +112,6 @@ u32 NandTransfer(u32 param) {
     if ((DumpNandFile(FF_AUTONAME | F_SECUREINFO) != 0) ||
         (DumpNandFile(FF_AUTONAME | F_MOVABLE) != 0) ||
         (DumpNandFile(FF_AUTONAME | F_LOCALFRIEND) != 0) ||
-        (DumpNandFile(FF_AUTONAME | F_TICKET) != 0) ||
         (DumpNandFile(FF_AUTONAME | F_CONFIGSAVE) != 0)) {
         if (!(param & TF_FORCED))
             return 1;
@@ -157,7 +156,6 @@ u32 NandTransfer(u32 param) {
     if ((!secnfo && (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_SECUREINFO) != 0)) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_MOVABLE) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_LOCALFRIEND) != 0) ||
-        (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_TICKET) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_CONFIGSAVE) != 0)) {
         if (!(param & TF_FORCED))
             return 1;
