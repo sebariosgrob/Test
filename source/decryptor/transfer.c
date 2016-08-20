@@ -16,12 +16,11 @@ u32 NandTransfer(u32 param) {
     PartitionInfo* p_info = GetPartitionInfo(P_CTRFULL);
     PartitionInfo* p_firm0 = GetPartitionInfo(P_FIRM0);
     PartitionInfo* p_firm1 = GetPartitionInfo(P_FIRM1);
-    u8 secnfo_data[0x200] = { 0xFF };
     u8* firm = BUFFER_ADDRESS;
     char filename[64] = { 0 };
     char hashname[64] = { 0 };
     bool a9lh = !(param & N_EMUNAND) && ((*(u32*) 0x101401C0) == 0);
-    bool secnfo = false;
+    bool secnfo_transfer = true;
     u32 region = GetRegion();
     u32 imgsize = 0;
     
@@ -77,12 +76,8 @@ u32 NandTransfer(u32 param) {
         if (region != sha256[0x20]) {
             Debug("Region does not match");
             if (!a9lh) {
-                char secnfoname[64];
-                snprintf(secnfoname, 64, "%s.secnfo", filename);
-                if ((FileGetData(secnfoname, secnfo_data, 0x111, 0) != 0x111) || (sha256[0x20] != secnfo_data[0x100]))
-                    return 1;
-                Debug("Using provided .secnfo file");
-                secnfo = true;
+                Debug("Using SecureInfo_A from image");
+                secnfo_transfer = false;
             }
         }
     }
@@ -143,17 +138,7 @@ u32 NandTransfer(u32 param) {
     
     Debug("");
     Debug("Step #4: Injecting transfer files");
-    if (secnfo) {
-        PartitionInfo* p_fat = GetPartitionInfo(P_CTRNAND);
-        u32 offset;
-        u32 size;
-        if ((DebugSeekFileInNand(&offset, &size, "SecureInfo_A", "RW         SYS        SECURE~?   ", p_fat) != 0) ||
-            (size != 0x111))
-            return 1;
-        if (EncryptMemToNand(secnfo_data, offset, 0x111, p_info) != 0)
-            return 1;
-    }
-    if ((!secnfo && (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_SECUREINFO) != 0)) ||
+    if ((secnfo_transfer && (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_SECUREINFO) != 0)) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_MOVABLE) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_LOCALFRIEND) != 0) ||
         (InjectNandFile(N_NANDWRITE | FF_AUTONAME | F_CONFIGSAVE) != 0)) {
