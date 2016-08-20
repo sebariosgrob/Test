@@ -23,7 +23,7 @@ u32 CryptTitlekey(TitleKeyEntry* entry, bool encrypt)
 
 u32 CryptTitlekeysFile(u32 param)
 {
-    EncKeysInfo *info = (EncKeysInfo*)0x20316000;
+    TitleKeysInfo *info = (TitleKeysInfo*)0x20316000;
     char filename[64];
 
     if (InputFileNameSelector(filename, (param & TK_ENCRYPTED) ? "decTitleKeys.bin" : "encTitleKeys.bin",
@@ -68,7 +68,7 @@ u32 DumpTitlekeysNand(u32 param)
 {
     PartitionInfo* ctrnand_info = GetPartitionInfo(P_CTRNAND);;
     u8* buffer = BUFFER_ADDRESS;
-    EncKeysInfo *info = (EncKeysInfo*) 0x20316000;
+    TitleKeysInfo *info = (TitleKeysInfo*) 0x20316000;
     char filename[64];
     
     u32 nKeys = 0;
@@ -76,12 +76,8 @@ u32 DumpTitlekeysNand(u32 param)
     u32 offset = 0;
     u32 size = 0;
     
-    Debug("Searching for ticket.db...");
-    if (SeekFileInNand(&offset, &size, "DBS        TICKET  DB ", ctrnand_info) != 0) {
-        Debug("Failed!");
+    if (DebugSeekFileInNand(&offset, &size, "ticket.db", "DBS        TICKET  DB ", ctrnand_info) != 0)
         return 1;
-    }
-    Debug("Found at %08X, size %uMB", offset, size / (1024 * 1024));
     
     Debug("%s Title Keys...", (param & TK_ENCRYPTED) ? "Dumping" : "Decrypting");
     memset(info, 0, 0x10);
@@ -121,7 +117,7 @@ u32 DumpTitlekeysNand(u32 param)
     info->n_entries = nKeys;
     ShowProgress(0, 0);
     
-    Debug("Decrypted %u unique Titlekeys", nKeys);
+    Debug("%s %u unique Titlekeys", (param & TK_ENCRYPTED) ? "Dumped" : "Decrypted", nKeys);
     Debug("Skipped %u useless Titlekeys", nSkipped);
     
     if (OutputFileNameSelector(filename, (param & TK_ENCRYPTED) ? "encTitleKeys.bin" : "decTitleKeys.bin", NULL) != 0)

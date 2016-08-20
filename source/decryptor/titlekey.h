@@ -17,7 +17,7 @@ typedef struct {
     u32 n_entries;
     u8  reserved[12];
     TitleKeyEntry entries[MAX_ENTRIES];
-} __attribute__((packed, aligned(16))) EncKeysInfo;
+} __attribute__((packed, aligned(16))) TitleKeysInfo;
 
 
 u32 CryptTitlekey(TitleKeyEntry* entry, bool encrypt);
