@@ -124,7 +124,7 @@ u32 ProcessEntry(MenuEntry* entry)
     // unlock sequence for dangerous features
     if (nand_write || a9lh_write) {
         const u32 unlockSequences[3][5] = {
-            { BUTTON_LEFT , BUTTON_RIGHT, BUTTON_DOWN , BUTTON_UP   , BUTTON_A }, // EmuNAND
+            { BUTTON_LEFT , BUTTON_RIGHT, BUTTON_A }, // EmuNAND
             { BUTTON_LEFT , BUTTON_UP   , BUTTON_RIGHT, BUTTON_UP   , BUTTON_A }, // SysNAND
             { BUTTON_RIGHT, BUTTON_DOWN , BUTTON_LEFT , BUTTON_DOWN , BUTTON_A }  // A9LH
         };
